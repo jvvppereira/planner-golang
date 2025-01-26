@@ -193,6 +193,12 @@ func PostTripsJSON201Response(body struct {
 	}
 }
 
+
+// CreateTripResponse defines model for CreateTripResponse.
+type CreateTripResponse struct {
+	TripID string `json:"tripId"`
+}
+
 // PostTripsJSON400Response is a constructor method for a PostTrips response.
 // A *Response is returned with the configured status code and content type from the spec.
 func PostTripsJSON400Response(body Error) *Response {
