@@ -7,6 +7,8 @@ import (
 	"planner-golang/internal/api/spec"
 	"planner-golang/internal/pgstore"
 
+	"github.com/go-playground/validator/v10"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -19,12 +21,14 @@ type store interface {
 }
 
 type API struct {
-	store  store
-	logger *zap.Logger
+	store     store
+	logger    *zap.Logger
+	validator *validator.Validate
 }
 
 func NewAPI(pool *pgxpool.Pool, logger *zap.Logger) API {
-	return API{pgstore.New(pool), logger}
+	validator = validator.New(validator.WithRequiredStructEnabled())
+	return API{pgstore.New(pool), logger, validator}
 }
 
 // Confirms a participant on a trip.
