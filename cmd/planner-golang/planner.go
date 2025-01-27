@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"planner-golang/internal/api"
 	"planner-golang/internal/api/spec"
+	"planner-golang/internal/mailer/mailpit"
 	"syscall"
 	"time"
 
@@ -71,7 +72,7 @@ func run(ctx context.Context) error {
 		return err
 	}
 
-	si := api.NewAPI(pool, logger)
+	si := api.NewAPI(pool, logger, mailpit.NewMailPit(pool))
 	r := chi.NewMux()
 	r.Use(middleware.RequestID, middleware.Recoverer, httputils.ChiLogger(logger))
 	r.Mount("/", spec.Handler(&si))
