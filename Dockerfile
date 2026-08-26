@@ -1,4 +1,4 @@
-FROM golang:1.27rc2
+FROM golang:1.27rc1-alpine3.24
 
 WORKDIR /planner-golang
 
