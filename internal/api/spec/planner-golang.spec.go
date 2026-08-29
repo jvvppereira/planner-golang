@@ -193,7 +193,6 @@ func PostTripsJSON201Response(body struct {
 	}
 }
 
-
 // CreateTripResponse defines model for CreateTripResponse.
 type CreateTripResponse struct {
 	TripID string `json:"tripId"`
