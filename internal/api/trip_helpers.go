@@ -129,6 +129,26 @@ func (api API) buildLinksResponse(links []pgstore.Link) *spec.Response {
 	return spec.GetTripsTripIDLinksJSON200Response(result)
 }
 
+func (api API) handleGetTripCollection[T any](
+	r *http.Request,
+	tripID string,
+	fetchFunc func(context.Context, uuid.UUID) ([]T, error),
+	errorResp func(spec.Error) *spec.Response,
+	buildResp func([]T) *spec.Response,
+) *spec.Response {
+	id, err := uuid.Parse(tripID)
+	if err != nil {
+		return errorResp(spec.Error{Message: errInvalidUUID})
+	}
+
+	items, err := fetchFunc(r.Context(), id)
+	if err != nil {
+		return api.handleTripNotFound(err, tripID, errorResp)
+	}
+
+	return buildResp(items)
+}
+
 func (api API) buildParticipantsResponse(participants []pgstore.Participant) *spec.Response {
 	var result struct {
 		Participants []struct {
