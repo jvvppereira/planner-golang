@@ -26,6 +26,7 @@ const (
 	errInvalidInput        = "invalid input: "
 	errTripNotFound        = "trip not found"
 	errParticipantNotFound = "participant not found"
+	contentTypeJSON        = "application/json"
 )
 
 type store interface {
@@ -281,53 +282,19 @@ func (api API) PostTripsTripIDActivities(w http.ResponseWriter, r *http.Request,
 // Confirm a trip and send e-mail invitations.
 // (GET /trips/{tripId}/confirm)
 func (api API) GetTripsTripIDConfirm(w http.ResponseWriter, r *http.Request, tripID string) *spec.Response {
-	var resp *spec.Response
-
 	id, err := uuid.Parse(tripID)
 	if err != nil {
-		resp = spec.GetTripsTripIDConfirmJSON400Response(spec.Error{Message: errInvalidUUID})
-	} else {
-		trip, err := api.store.GetTrip(r.Context(), id)
-		if err != nil {
-			resp = api.handleGetTripError(err, tripID, spec.GetTripsTripIDConfirmJSON400Response)
-		} else if trip.IsConfirmed {
-			resp = spec.GetTripsTripIDConfirmJSON400Response(spec.Error{Message: "trip already confirmed"})
-		} else {
-			resp = api.confirmTripAndSendEmail(r.Context(), id, trip)
-		}
+		return spec.GetTripsTripIDConfirmJSON400Response(spec.Error{Message: errInvalidUUID})
 	}
 
-	return resp
-}
-
-func (api API) handleGetTripError(err error, tripID string, responseFunc func(spec.Error) *spec.Response) *spec.Response {
-	if errors.Is(err, pgx.ErrNoRows) {
-		return responseFunc(spec.Error{Message: errTripNotFound})
-	}
-	api.logger.Error("failed to get trip for confirmation", zap.Error(err), zap.String("trip_id", tripID))
-	return responseFunc(spec.Error{Message: errSomethingWentWrong})
-}
-
-func (api API) confirmTripAndSendEmail(ctx context.Context, tripID uuid.UUID, trip pgstore.Trip) *spec.Response {
-	err := api.store.UpdateTrip(ctx, pgstore.UpdateTripParams{
-		Destination: trip.Destination,
-		EndsAt:      trip.EndsAt,
-		StartsAt:    trip.StartsAt,
-		IsConfirmed: true,
-		ID:          tripID,
-	})
+	trip, err := api.store.GetTrip(r.Context(), id)
 	if err != nil {
-		api.logger.Error("failed to confirm trip", zap.Error(err), zap.String("trip_id", tripID.String()))
-		return spec.GetTripsTripIDConfirmJSON400Response(spec.Error{Message: errSomethingWentWrong})
+		return api.handleTripNotFound(err, tripID, spec.GetTripsTripIDConfirmJSON400Response)
+	} else if trip.IsConfirmed {
+		return spec.GetTripsTripIDConfirmJSON400Response(spec.Error{Message: "trip already confirmed"})
 	}
 
-	go func() {
-		if err := api.mailer.SendConfirmTripEmailToTripOwner(tripID); err != nil {
-			api.logger.Error("failed to send email on GetTripsTripIDConfirm", zap.Error(err), zap.String("tripID", tripID.String()))
-		}
-	}()
-
-	return spec.GetTripsTripIDConfirmJSON204Response(nil)
+	return api.confirmTripAndSendEmail(r.Context(), id, trip)
 }
 
 // Invite someone to the trip.

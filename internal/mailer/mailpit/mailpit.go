@@ -27,23 +27,23 @@ func (mp MailPit) SendConfirmTripEmailToTripOwner(tripId uuid.UUID) error {
 	ctx := context.Background()
 	trip, err := mp.store.GetTrip(ctx, tripId)
 	if err != nil {
-		return fmt.Errorf("mailpit: falied to get trip for SendConfirmTripEmailToTripOwner : %w", err)
+		return fmt.Errorf("mailpit: failed to get trip for SendConfirmTripEmailToTripOwner: %w", err)
 	}
 
 	msg := mail.NewMsg()
 	if err := msg.From("mailpit@planner.com"); err != nil {
-		return fmt.Errorf("mailpit: falied to set From in email; SendConfirmTripEmailToTripOwner : %w", err)
+		return fmt.Errorf("mailpit: failed to set From in email: %w", err)
 	}
 
 	if err := msg.To(trip.OwnerEmail); err != nil {
-		return fmt.Errorf("mailpit: falied to set To in email; SendConfirmTripEmailToTripOwner : %w", err)
+		return fmt.Errorf("mailpit: failed to set To in email: %w", err)
 	}
 
 	msg.Subject("Confirm your trip!")
 	msg.SetBodyString(mail.TypeTextPlain, fmt.Sprintf(`
 		Hi %s,
 
-		Your trip to %s that starts on %s need to be confirmed.
+		Your trip to %s that starts on %s needs to be confirmed.
 
 		Click on link below to confirm.
 	`,
@@ -53,13 +53,12 @@ func (mp MailPit) SendConfirmTripEmailToTripOwner(tripId uuid.UUID) error {
 	))
 
 	client, err := mail.NewClient("mailpit", mail.WithTLSPortPolicy(mail.NoTLS), mail.WithPort(1025))
-
 	if err != nil {
-		return fmt.Errorf("mailpit: falied to create email client; SendConfirmTripEmailToTripOwner : %w", err)
+		return fmt.Errorf("mailpit: failed to create email client: %w", err)
 	}
 
 	if err := client.DialAndSend(msg); err != nil {
-		return fmt.Errorf("mailpit: falied to send email; SendConfirmTripEmailToTripOwner : %w", err)
+		return fmt.Errorf("mailpit: failed to send email: %w", err)
 	}
 
 	return nil
