@@ -11,7 +11,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/phenpessoa/gutils v0.0.0-20240130030144-d391b9329afd
-	github.com/wneessen/go-mail v0.6.1
+	github.com/wneessen/go-mail v0.8.1
 	go.uber.org/zap v1.27.0
 )
 
