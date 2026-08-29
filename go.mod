@@ -5,11 +5,11 @@ go 1.27.0
 require (
 	github.com/discord-gophers/goapi-gen v0.3.0
 	github.com/getkin/kin-openapi v0.149.0
-	github.com/go-chi/chi/v5 v5.2.0
+	github.com/go-chi/chi/v5 v5.3.2
 	github.com/go-chi/render v1.0.3
 	github.com/go-playground/validator/v10 v10.24.0
 	github.com/google/uuid v1.6.0
-	github.com/jackc/pgx/v5 v5.7.2
+	github.com/jackc/pgx/v5 v5.10.0
 	github.com/phenpessoa/gutils v0.0.0-20240130030144-d391b9329afd
 	github.com/wneessen/go-mail v0.6.1
 	go.uber.org/zap v1.27.0
