@@ -1,5 +1,7 @@
 # Trip Planner API (Golang)
 
+[![Maintainability](https://qlty.sh/gh/jvvppereira/projects/planner-golang/maintainability.svg)](https://qlty.sh/gh/jvvppereira/projects/planner-golang)
+
 A robust backend service for a trip planning application, built with Go. This project provides a RESTful API to manage trips, participants, and activities, featuring email notifications and automated code generation from OpenAPI specifications.
 
 ## 🚀 Technologies and Libraries
@@ -7,7 +9,7 @@ A robust backend service for a trip planning application, built with Go. This pr
 This project leverages modern Go libraries and tools to ensure performance, reliability, and developer productivity:
 
 ### Core Framework & Routing
-- **[Go (Golang)](https://golang.org/):** Version 1.22.5.
+- **[Go (Golang)](https://golang.org/):** Version 1.27.0.
 - **[Chi (v5)](https://github.com/go-chi/chi):** A lightweight, idiomatic, and composable router for building HTTP services.
 - **[Chi Render](https://github.com/go-chi/render):** Managed content-type negotiation and response rendering.
 
@@ -36,8 +38,11 @@ This project leverages modern Go libraries and tools to ensure performance, reli
 
 - `cmd/planner-golang`: Entry point of the application.
 - `internal/api`: API handlers and logic implementation.
+  - `api.go`: Core types, interfaces, and constructor.
+  - `trip_helpers.go`: Shared helper functions for trip operations.
+  - `*_get.go`, `*_create.go`, `*_update.go`: Individual endpoint handlers.
 - `internal/api/spec`: OpenAPI 3 specification and generated code.
-- `internal/pgstore`: Database interactions and queries.
+- `internal/pgstore`: Database interactions and queries (sqlc generated).
 - `internal/mailer`: Email delivery logic (configured for Mailpit).
 
 ---
