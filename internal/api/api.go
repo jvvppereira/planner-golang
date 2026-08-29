@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"time"
 
 	openapi_types "github.com/discord-gophers/goapi-gen/types"
 	"github.com/go-playground/validator/v10"
@@ -121,48 +120,17 @@ func (api API) PostTrips(w http.ResponseWriter, r *http.Request) *spec.Response 
 // Get a trip details.
 // (GET /trips/{tripId})
 func (api API) GetTripsTripID(w http.ResponseWriter, r *http.Request, tripID string) *spec.Response {
-	var resp *spec.Response
-
 	id, err := uuid.Parse(tripID)
 	if err != nil {
-		resp = spec.GetTripsTripIDJSON400Response(spec.Error{Message: errInvalidUUID})
-	} else {
-		trip, err := api.store.GetTrip(r.Context(), id)
-		if err != nil {
-			if errors.Is(err, pgx.ErrNoRows) {
-				resp = spec.GetTripsTripIDJSON400Response(spec.Error{Message: errTripNotFound})
-			} else {
-				api.logger.Error("failed to get trip", zap.Error(err), zap.String("trip_id", tripID))
-				resp = spec.GetTripsTripIDJSON400Response(spec.Error{Message: errSomethingWentWrong})
-			}
-		} else {
-			resp = spec.GetTripsTripIDJSON200Response(struct {
-				Trip struct {
-					Destination string    `json:"destination"`
-					EndsAt      time.Time `json:"ends_at"`
-					ID          string    `json:"id"`
-					IsConfirmed bool      `json:"is_confirmed"`
-					StartsAt    time.Time `json:"starts_at"`
-				} `json:"trip"`
-			}{
-				Trip: struct {
-					Destination string    `json:"destination"`
-					EndsAt      time.Time `json:"ends_at"`
-					ID          string    `json:"id"`
-					IsConfirmed bool      `json:"is_confirmed"`
-					StartsAt    time.Time `json:"starts_at"`
-				}{
-					Destination: trip.Destination,
-					EndsAt:      trip.EndsAt.Time,
-					ID:          trip.ID.String(),
-					IsConfirmed: trip.IsConfirmed,
-					StartsAt:    trip.StartsAt.Time,
-				},
-			})
-		}
+		return spec.GetTripsTripIDJSON400Response(spec.Error{Message: errInvalidUUID})
 	}
 
-	return resp
+	trip, err := api.store.GetTrip(r.Context(), id)
+	if err != nil {
+		return api.handleTripNotFound(err, tripID, spec.GetTripsTripIDJSON400Response)
+	}
+
+	return api.buildTripResponse(trip)
 }
 
 // Update a trip.
